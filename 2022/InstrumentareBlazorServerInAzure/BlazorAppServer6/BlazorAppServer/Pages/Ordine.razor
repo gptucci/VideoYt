@@ -1,0 +1,74 @@
+﻿@page "/"
+
+@using BlazorAppServer.Data
+@inject ArticoliService articoliService
+@inject IJSRuntime JS
+
+
+<PageTitle>Ordine</PageTitle>
+
+<h1>Blazor 6 Server</h1>
+
+@if (articoli == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>CodiceArticolo</th>
+                <th>Descrizione</th>
+                <th></th>
+                <th>Qta</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <Virtualize Items="@articoli" Context="articolo" TItem="Articolo">
+                <tr>
+                    <td>
+                        <a href="/dettaglio/@(articolo.CodiceArticolo)"><img src="@articolo.URLPhoto" height="99" width="99" /></a>
+                    </td>
+                    <td>@articolo.CodiceArticolo</td>
+                    <td>@articolo.Descrizione</td>
+                    <td>
+                    <img src="/img/minus.png" @onclick="@(()=> OnMinusClicked(articolo))" height="45" width="45" />
+                    </td>
+                    <td><input type="number" @bind="@articolo.Quantita" width="10"  /> </td>
+                    <td>
+                    <img src="/img/plus.png" @onclick="@(()=> OnPlusClicked(articolo))" height="45" width="45" />
+                    </td>
+                </tr>
+            </Virtualize>
+        </tbody>
+    </table>
+}
+
+@code {
+    private Articolo[] articoli;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        articoli= await articoliService.GetArticoliAsync(DateTime.Now);
+    }
+    
+    public void OnPlusClicked(Articolo obj)
+    {
+        obj.Quantita += 1;
+    }
+    
+    private void OnMinusClicked(Articolo obj)
+    {
+        if (obj.Quantita <= 0)
+        {
+            obj.Quantita = 0;
+            return;
+        }
+
+        obj.Quantita -= 1;
+    }
+}
